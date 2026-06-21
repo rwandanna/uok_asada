@@ -1,12 +1,8 @@
 # Advanced System Analysis and Design of Algorithms
-### Individual Assignment — Full Answer Sheet
 
 | | |
 |---|---|
-| **Student Name** | Victor Isingizwe Munezero |
-| **Registration Number** | 26015486 |
-| **Programme** | Information Technology — Graduate Programs |
-| **Lecturer** | Dr. Jean Bosco Musabe |
+
 | **Date** | June 20, 2026 |
 
 > **Note on this revision:** Every algorithm in this document was independently re-implemented and **executed against automated test suites** (unit tests, boundary tests, and — where possible — randomized stress tests cross-validated against Python's own standard-library equivalents or brute-force ground truth). Several gaps in the original draft were found and fixed in the process; each is flagged inline with a **🔧 Fix applied** note so the correction is traceable. A companion `.ipynb` notebook is provided per question with the same code actually executed, showing real output.
