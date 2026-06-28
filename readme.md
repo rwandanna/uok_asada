@@ -1,562 +1,921 @@
 # Advanced System Analysis and Design of Algorithms
 
-| | |
-|---|---|
-
-| **Date** | June 20, 2026 |
-
-> **Note on this revision:** Every algorithm in this document was independently re-implemented and **executed against automated test suites** (unit tests, boundary tests, and — where possible — randomized stress tests cross-validated against Python's own standard-library equivalents or brute-force ground truth). Several gaps in the original draft were found and fixed in the process; each is flagged inline with a **🔧 Fix applied** note so the correction is traceable. A companion `.ipynb` notebook is provided per question with the same code actually executed, showing real output.
 
 ---
 
-# QUESTION 1: Algorithm Design for University Registration System
+## Table of Contents
 
-## Introduction
+1. [Question 1 — Automated Water Billing System](#question-1-automated-water-billing-system)
+2. [Question 2 — Bank Loan Eligibility System](#question-2-bank-loan-eligibility-system)
+3. [Question 3 — Social Media Friend Recommendation System](#question-3-social-media-friend-recommendation-system)
+4. [Question 4 — Search Algorithm Comparison](#question-4-search-algorithm-comparison--online-supermarket)
+5. [Question 5 — Delivery Route Optimization](#question-5-delivery-route-optimization--east-africa-logistics)
+6. [Question 6 — Intelligent Road Navigation System](#question-6-intelligent-road-navigation-system)
+7. [Question 7 — Student Performance Analytics](#question-7-student-performance-analytics--sorting-algorithms)
+8. [Question 8 — Hospital Patient Queue Management](#question-8-hospital-patient-queue-management-system)
+9. [Question 9 — Student Records Hash Table](#question-9-student-records-hash-table--online-learning-platform)
+10. [Question 10 — Product Recommendation Engine](#question-10-product-recommendation-engine--recursion-and-divide-and-conquer)
 
-University registration systems are essential information systems that manage student enrollment, course allocation, and academic records. An effective registration algorithm must ensure correctness, prevent duplicate registrations, validate inputs, and enforce course capacity constraints.
+---
 
-## (a) Python Function-Based Algorithm for Student Registration
+# Question 1: Automated Water Billing System
 
-```python
-students = {}
+This question addresses automating a manual billing process for a national water utility. Customers are charged based on consumption units, with an environmental surcharge applied above a defined threshold.
 
-def register_student(student_id, name, email):
-    if not student_id or not name or not email:
-        return False, "Error: Missing student information."
-    if student_id in students:
-        return False, "Error: Student already registered (duplicate ID)."
-    students[student_id] = {"name": name, "email": email, "courses": []}
-    return True, "Student registered successfully."
+---
+
+## (a) Structured English Algorithm
+
+The following step-by-step algorithm describes the complete billing process:
+
 ```
-
-The function verifies whether a student already exists and that no required field is missing before storing the record. Using a dictionary keyed by `student_id` gives O(1) average-case duplicate checking and insertion.
-
-## (b) Course Allocation Using Conditional Statements
-
-```python
-courses = {
-    "Algorithms": {"capacity": 2, "students": []},
-    "Databases": {"capacity": 1, "students": []},
-}
-
-def allocate_course(student_id, course_name):
-    if student_id not in students:
-        return False, "Error: Student is not registered."
-    if course_name not in courses:
-        return False, "Error: Course does not exist."
-    course = courses[course_name]
-    if student_id in course["students"]:
-        return False, "Error: Student already enrolled in this course."
-    if len(course["students"]) >= course["capacity"]:
-        return False, "Error: Course is full."
-    course["students"].append(student_id)
-    students[student_id]["courses"].append(course_name)
-    return True, "Course allocated successfully."
-```
-
-> **🔧 Fix applied:** the original draft allocated a course without first checking that the student was actually registered, which would silently corrupt the `students` dictionary (`KeyError` or worse, a phantom course entry) for an unregistered ID. It also did not guard against the same student being enrolled in the same course twice. Both checks are added above and are covered by the test suite in the notebook.
-
-## (c) Pseudocode for the Registration Process
-
-```text
 START
 
-INPUT student_id, name, email
+  Step 1:  Input customer name and account number
+  Step 2:  Input number of water units consumed
+  Step 3:  Set UNIT_PRICE = 500 (Rwf per unit)
+  Step 4:  Set SURCHARGE_RATE = 0.15 (15%)
+  Step 5:  Set THRESHOLD = 50 (units)
 
-IF student_id is empty OR name is empty OR email is empty THEN
-    DISPLAY "Missing Information"
-    STOP
-END IF
+  Step 6:  Calculate base_bill = units_consumed × UNIT_PRICE
 
-IF student_id already exists THEN
-    DISPLAY "Duplicate Registration"
-    STOP
-END IF
+  Step 7:  IF units_consumed > THRESHOLD THEN
+               excess_units = units_consumed - THRESHOLD
+               surcharge = excess_units × UNIT_PRICE × SURCHARGE_RATE
+           ELSE
+               surcharge = 0
+           END IF
 
-STORE student record
+  Step 8:  Calculate total_bill = base_bill + surcharge
+  Step 9:  Calculate VAT = total_bill × 0.18
+  Step 10: Calculate grand_total = total_bill + VAT
 
-DISPLAY "Registration Successful"
+  Step 11: Print customer billing statement
+  Step 12: Print account number, name, units consumed
+  Step 13: Print base bill, surcharge, VAT, and grand total
 
 END
 ```
 
-```text
-COURSE ALLOCATION
+---
 
-START
-INPUT student_id, course_name
+## (b) Flowchart (Mermaid)
 
-IF student_id NOT IN students THEN
-    DISPLAY "Student Not Registered"; STOP
-END IF
-IF course_name NOT IN courses THEN
-    DISPLAY "Course Does Not Exist"; STOP
-END IF
-IF student already enrolled in course THEN
-    DISPLAY "Already Enrolled"; STOP
-END IF
-IF enrolled count >= capacity THEN
-    DISPLAY "Course Full"; STOP
-END IF
+The flowchart below maps the complete billing process, including the surcharge decision branch. Paste the code into [mermaid.live](https://mermaid.live) to render.
 
-ADD student to course
-DISPLAY "Course Allocated Successfully"
-END
+```mermaid
+flowchart TD
+    A([Start]) --> B[Input: Customer Name, Account No.]
+    B --> C[Input: Units Consumed]
+    C --> D[Set: unit_price=500, threshold=50, surcharge_rate=0.15]
+    D --> E[Calculate base_bill = units × unit_price]
+    E --> F{units > threshold?}
+    F -- Yes --> G[excess = units - threshold]
+    G --> H[surcharge = excess × unit_price × surcharge_rate]
+    H --> I[total_bill = base_bill + surcharge]
+    F -- No --> J[surcharge = 0]
+    J --> I
+    I --> K[VAT = total_bill × 0.18]
+    K --> L[grand_total = total_bill + VAT]
+    L --> M[Print Billing Statement]
+    M --> N([End])
 ```
-
-## (d) Constraint Validation
-
-```python
-def validate_registration(student_id, name, email):
-    if not student_id or not name or not email:
-        return False, "Missing data"
-    if student_id in students:
-        return False, "Duplicate ID"
-    return True, "Valid Registration"
-```
-
-The algorithm guarantees:
-- No duplicate student IDs
-- No missing information
-- No duplicate enrollment in the same course
-- Capacity limits are respected
-- Valid registrations are successfully stored
-
-**Verified by automated tests** (see notebook): duplicate ID rejection, missing-field rejection, double-enrollment rejection, capacity-exceeded rejection, and unregistered-student rejection were all exercised with `assert` statements and passed.
-
-### Complexity Analysis
-
-| Operation | Complexity |
-|---|---|
-| Duplicate Check | O(1) |
-| Insertion | O(1) |
-| Course Allocation Validation | O(1) amortized |
-
-**Overall Complexity: O(1)** per registration/allocation call.
 
 ---
 
-# QUESTION 2: Computational Thinking in Academic Systems
+## (c) Sample Calculations
 
-## Introduction
+Three customers with different consumption levels demonstrate the algorithm:
 
-Computational thinking is a problem-solving methodology involving decomposition, pattern recognition, abstraction, and algorithm design. Academic systems such as student management systems benefit significantly from this approach.
+| Customer | Units | Base Bill (Rwf) | Surcharge (Rwf) | Grand Total (Rwf) |
+|---|---|---|---|---|
+| Alice (low) | 30 | 15,000 | 0 | 17,700 |
+| Bob (at threshold) | 50 | 25,000 | 0 | 29,500 |
+| Carol (excess) | 80 | 40,000 | 2,250 | 49,855 |
 
-## (a) Applying Computational Thinking
-
-**Decomposition** — the system is broken into independent sub-problems: Student Registration, Marks Entry, Grade Calculation, Reporting.
-
-**Pattern Recognition** — every student follows the identical workflow:
-
-```
-Registration → Marks Entry → Average Calculation → Grade Assignment → Reporting
-```
-
-Recognizing this repeated pattern allows one algorithm to be reused for every student instead of writing bespoke logic per student.
-
-**Abstraction** — only relevant information is considered (Student ID, Student Name, Marks); the system hides implementation details such as database storage and calculation internals.
-
-## (b) Algorithm for Average Marks and Grade
-
-```python
-def calculate_grade(marks):
-    if not marks:
-        raise ValueError("marks list cannot be empty")
-    for m in marks:
-        if not (0 <= m <= 100):
-            raise ValueError(f"invalid mark: {m} (must be 0-100)")
-
-    average = sum(marks) / len(marks)
-
-    if average >= 80:
-        grade = "A"
-    elif average >= 70:
-        grade = "B"
-    elif average >= 60:
-        grade = "C"
-    elif average >= 50:
-        grade = "D"
-    else:
-        grade = "F"
-
-    return average, grade
-
-
-marks = [75, 80, 90]
-avg, grade = calculate_grade(marks)
-print("Average:", avg)
-print("Grade:", grade)
-```
-
-> **🔧 Fix applied:** the original implementation had no input validation. An empty `marks` list would raise an unhandled `ZeroDivisionError`, and an out-of-range mark (e.g. `150`) would silently produce an invalid average. Explicit validation is added, with both failure modes covered by tests.
-
-## (c) Pseudocode
-
-```text
-START
-INPUT marks[]
-
-IF marks is empty THEN
-    DISPLAY "Error: No marks provided"; STOP
-END IF
-
-FOR EACH mark IN marks
-    IF mark < 0 OR mark > 100 THEN
-        DISPLAY "Error: Invalid mark"; STOP
-    END IF
-END FOR
-
-average ← SUM(marks) / COUNT(marks)
-
-IF average >= 80      THEN grade ← "A"
-ELSE IF average >= 70  THEN grade ← "B"
-ELSE IF average >= 60  THEN grade ← "C"
-ELSE IF average >= 50  THEN grade ← "D"
-ELSE                        grade ← "F"
-END IF
-
-DISPLAY average, grade
-END
-```
-
-## (d) Algorithm Correctness and Validation
-
-**Correctness:** every input mark contributes to the sum exactly once, so the mean is computed accurately. The grade boundaries `[80,∞) [70,80) [60,70) [50,60) [0,50)` are mutually exclusive and exhaustive over the valid range, so exactly one grade is always assigned. The algorithm processes a finite list with no unbounded loops, so it always terminates — giving both partial correctness and termination, i.e. total correctness.
-
-**Validation methods** (each demonstrated as an executable test in the notebook, not just claimed):
-- Unit testing — known input/output pairs
-- Boundary testing — values exactly at grade-band edges (79 vs 80, 49 vs 50, etc.)
-- Input validation / exception handling — empty list and out-of-range marks are rejected, not silently miscomputed
-
-### Complexity Analysis
-
-Average Calculation: **O(n)**, where n = number of marks.
+> **Carol's calculation detail:** excess = 80 − 50 = 30 units; surcharge = 30 × 500 × 0.15 = Rwf 2,250; total before VAT = 42,250; VAT (18%) = 7,605; grand total = **Rwf 49,855**.
 
 ---
 
-# QUESTION 3: Graph-Based Social Network Analysis
-
-## Introduction
-
-Social networks can be represented using graphs where users are vertices and friendships are edges.
-
-## (a) Adjacency List Representation
+## (d) Python Implementation
 
 ```python
-graph = {
-    "Victor": ["Alice", "Bob"],
-    "Alice": ["Victor", "Bob"],
-    "Bob": ["Victor", "Alice", "David"],
-    "David": ["Bob"],
-}
+# Water Billing System
+# Calculates customer bills with optional conservation surcharge
+
+UNIT_PRICE     = 500        # Cost per unit in Rwf
+THRESHOLD      = 50         # Surcharge applies above this consumption
+SURCHARGE_RATE = 0.15       # 15% on excess units
+VAT_RATE       = 0.18       # 18% VAT
+
+
+def calculate_bill(units: float) -> dict:
+    """Return a breakdown dictionary for the given units consumed."""
+    base_bill = units * UNIT_PRICE
+    surcharge = 0.0
+    if units > THRESHOLD:
+        excess = units - THRESHOLD
+        surcharge = excess * UNIT_PRICE * SURCHARGE_RATE
+    total_before_vat = base_bill + surcharge
+    vat = total_before_vat * VAT_RATE
+    grand_total = total_before_vat + vat
+    return {
+        "base_bill":   base_bill,
+        "surcharge":   surcharge,
+        "vat":         vat,
+        "grand_total": grand_total
+    }
+
+
+def print_bill(name: str, account: str, units: float) -> None:
+    """Display a formatted billing statement for the customer."""
+    bill = calculate_bill(units)
+    print("=" * 50)
+    print("   NATIONAL WATER UTILITY - BILLING STATEMENT")
+    print("=" * 50)
+    print(f"  Customer Name : {name}")
+    print(f"  Account Number: {account}")
+    print(f"  Units Consumed: {units}")
+    print("-" * 50)
+    print(f"  Base Bill     : Rwf {bill['base_bill']:>10,.0f}")
+    print(f"  Surcharge     : Rwf {bill['surcharge']:>10,.0f}")
+    print(f"  VAT (18%)     : Rwf {bill['vat']:>10,.0f}")
+    print("-" * 50)
+    print(f"  TOTAL DUE     : Rwf {bill['grand_total']:>10,.0f}")
+    print("=" * 50)
+
+
+# --- Test Cases ---
+print_bill("Alice Uwimana", "ACC-001", 30)
+print_bill("Bob Kagabo",    "ACC-002", 50)
+print_bill("Carol Mutoni",  "ACC-003", 80)
 ```
 
-> **🔧 Enhancement:** to properly demonstrate the "no mutual friends" edge case in part (c), a second, disconnected pair (`Eve`–`Frank`) is added in the notebook version — most real social graphs are not fully connected, and a complete test suite should cover that.
+### Expected Output
 
-## (b) BFS Traversal
+```
+==================================================
+   NATIONAL WATER UTILITY - BILLING STATEMENT
+==================================================
+  Customer Name : Alice Uwimana
+  Account Number: ACC-001
+  Units Consumed: 30
+--------------------------------------------------
+  Base Bill     : Rwf     15,000
+  Surcharge     : Rwf          0
+  VAT (18%)     : Rwf      2,700
+--------------------------------------------------
+  TOTAL DUE     : Rwf     17,700
+==================================================
+```
+
+---
+
+# Question 2: Bank Loan Eligibility System
+
+This question develops an automated loan eligibility assessment system that evaluates applicants based on four criteria: salary, employment status, credit score, and existing debt levels.
+
+---
+
+## (a) Role of Algorithms in Banking Information Systems
+
+Algorithms are the decision-making backbone of modern banking information systems. Rather than relying on subjective human judgment, algorithms apply consistent, auditable rules that process applicant data and return objective outcomes. In a loan system, an algorithm:
+
+- **Ensures consistency** — every applicant is evaluated against identical criteria
+- **Increases speed** — thousands of applications can be processed in seconds
+- **Reduces bias** — decisions are based on data, not personal relationships
+- **Supports compliance** — automated audit trails satisfy regulatory requirements
+- **Scales effortlessly** — the same logic handles ten or ten million applications
+
+Financial institutions also use algorithms for fraud detection, credit scoring, risk modelling, and real-time transaction monitoring. The reliability and correctness of these algorithms directly affects both profitability and customer trust.
+
+---
+
+## (b) Pseudocode Algorithm
+
+```
+BEGIN LoanEligibility
+
+  INPUT applicant_name
+  INPUT monthly_salary
+  INPUT employment_status    // 'employed' or 'unemployed'
+  INPUT credit_score         // 0 - 850
+  INPUT existing_debt        // total monthly debt obligations
+
+  SET MIN_SALARY     = 300000   // Rwf per month
+  SET MIN_CREDIT     = 650
+  SET MAX_DEBT_RATIO = 0.40     // debt must be < 40% of salary
+
+  IF employment_status != 'employed' THEN
+      OUTPUT 'REJECTED: Applicant must be employed'
+      STOP
+  END IF
+
+  IF monthly_salary < MIN_SALARY THEN
+      OUTPUT 'REJECTED: Salary below minimum threshold'
+      STOP
+  END IF
+
+  IF credit_score < MIN_CREDIT THEN
+      OUTPUT 'REJECTED: Credit score too low'
+      STOP
+  END IF
+
+  SET debt_ratio = existing_debt / monthly_salary
+
+  IF debt_ratio >= MAX_DEBT_RATIO THEN
+      OUTPUT 'REJECTED: Debt-to-income ratio too high'
+      STOP
+  END IF
+
+  // All checks passed — calculate maximum loan
+  SET disposable          = monthly_salary - existing_debt
+  SET max_monthly_payment = disposable * 0.30
+  SET max_loan            = max_monthly_payment * 36   // 3-year term
+
+  OUTPUT 'APPROVED'
+  OUTPUT 'Maximum Loan Amount: ' + max_loan
+
+END LoanEligibility
+```
+
+---
+
+## (c) Flowchart (Mermaid)
+
+```mermaid
+flowchart TD
+    A([Start]) --> B[Input: Name, Salary, Employment, Credit, Debt]
+    B --> C{Employed?}
+    C -- No --> R1[Reject: Not Employed]
+    R1 --> Z([End])
+    C -- Yes --> D{Salary >= 300,000?}
+    D -- No --> R2[Reject: Low Salary]
+    R2 --> Z
+    D -- Yes --> E{Credit Score >= 650?}
+    E -- No --> R3[Reject: Low Credit Score]
+    R3 --> Z
+    E -- Yes --> F[Compute debt_ratio = debt / salary]
+    F --> G{debt_ratio < 0.40?}
+    G -- No --> R4[Reject: High Debt Ratio]
+    R4 --> Z
+    G -- Yes --> H[Compute max_loan = disposable × 0.30 × 36]
+    H --> I[Output: APPROVED + max_loan]
+    I --> Z
+```
+
+---
+
+## (d) Python Implementation
+
+```python
+# Automated Loan Eligibility Assessment System
+
+MIN_SALARY       = 300_000  # Rwf per month
+MIN_CREDIT       = 650
+MAX_DEBT_RATIO   = 0.40
+LOAN_TERM_MONTHS = 36
+
+
+def assess_loan(name, salary, employed, credit_score, debt):
+    """Evaluate loan eligibility and return a result message."""
+    print(f"\n{'=' * 52}")
+    print(f"  LOAN APPLICATION: {name}")
+    print(f"{'=' * 52}")
+
+    if not employed:
+        return "REJECTED: Applicant must be employed."
+    if salary < MIN_SALARY:
+        return f"REJECTED: Salary Rwf {salary:,} is below minimum Rwf {MIN_SALARY:,}."
+    if credit_score < MIN_CREDIT:
+        return f"REJECTED: Credit score {credit_score} is below minimum {MIN_CREDIT}."
+
+    debt_ratio = debt / salary
+    if debt_ratio >= MAX_DEBT_RATIO:
+        return f"REJECTED: Debt ratio {debt_ratio:.0%} exceeds 40% limit."
+
+    disposable  = salary - debt
+    max_payment = disposable * 0.30
+    max_loan    = max_payment * LOAN_TERM_MONTHS
+    return (f"APPROVED\n  Maximum Loan    : Rwf {max_loan:>12,.0f}\n"
+            f"  Monthly Payment : Rwf {max_payment:>12,.0f}")
+
+
+# --- Test Cases ---
+cases = [
+    ("Grace Ingabire",  450_000, True,  720, 60_000),   # APPROVE
+    ("Paul Mutabazi",   200_000, True,  700, 30_000),   # Reject: low salary
+    ("Jean Nsabimana",  500_000, False, 700, 50_000),   # Reject: unemployed
+    ("Diane Uwase",     400_000, True,  580, 40_000),   # Reject: low credit
+]
+
+for case in cases:
+    result = assess_loan(*case)
+    print(f"  Result: {result}")
+```
+
+---
+
+# Question 3: Social Media Friend Recommendation System
+
+This question applies graph theory and set operations to model social network friendships and derive meaningful recommendations.
+
+---
+
+## (a) Adjacency List Graph Implementation
+
+In graph theory, a social network is naturally modelled as an undirected graph where users are vertices and friendships are edges. An adjacency list stores each user alongside a list of their direct friends, making it both memory-efficient and fast for traversal operations.
+
+```python
+# Social Network Graph using Adjacency List
+
+class SocialGraph:
+    """Undirected graph representing social network friendships."""
+
+    def __init__(self):
+        self.graph = {}
+
+    def add_user(self, user):
+        if user not in self.graph:
+            self.graph[user] = []
+
+    def add_friendship(self, user1, user2):
+        self.add_user(user1)
+        self.add_user(user2)
+        if user2 not in self.graph[user1]:
+            self.graph[user1].append(user2)
+        if user1 not in self.graph[user2]:
+            self.graph[user2].append(user1)
+
+    def get_friends(self, user):
+        return self.graph.get(user, [])
+
+    def display(self):
+        print("\n--- Social Graph (Adjacency List) ---")
+        for user, friends in self.graph.items():
+            print(f"  {user:10s} --> {friends}")
+
+
+# Build sample network
+net = SocialGraph()
+net.add_friendship("Alice", "Bob")
+net.add_friendship("Alice", "Carol")
+net.add_friendship("Bob",   "Dave")
+net.add_friendship("Carol", "Dave")
+net.add_friendship("Dave",  "Eve")
+net.add_friendship("Alice", "Eve")
+net.display()
+```
+
+---
+
+## (b) BFS Traversal for User Connections
+
+Breadth-First Search (BFS) explores a graph layer by layer, starting from the source user and visiting all direct friends before moving to friends-of-friends. This mirrors how a recommendation system identifies degree-1 and degree-2 connections.
 
 ```python
 from collections import deque
 
-def bfs(graph, start):
-    visited = {start}
-    queue = deque([start])
-    order = []
+def bfs(graph_obj, start):
+    """Traverse network using BFS and display connection order."""
+    visited = set()
+    queue   = deque([(start, 0)])  # (user, depth)
+    visited.add(start)
+    print(f"\nBFS traversal from '{start}':")
+
     while queue:
-        node = queue.popleft()
-        order.append(node)
-        for neighbour in graph[node]:
+        user, depth = queue.popleft()
+        print(f"  Depth {depth}: {user}")
+        for friend in graph_obj.get_friends(user):
+            if friend not in visited:
+                visited.add(friend)
+                queue.append((friend, depth + 1))
+
+
+bfs(net, "Alice")
+
+# Expected Output:
+# Depth 0: Alice
+# Depth 1: Bob
+# Depth 1: Carol
+# Depth 1: Eve
+# Depth 2: Dave
+```
+
+---
+
+## (c) Set Operations on Friendship Data
+
+Set operations make it straightforward to find mutual friends, people in at least one of two friend circles, or friends exclusive to one user.
+
+```python
+# Friendship sets for set operations
+alice_friends = {"Bob", "Carol", "Eve", "Dave"}
+bob_friends   = {"Alice", "Dave", "Frank", "Grace"}
+carol_friends = {"Alice", "Dave", "Henry"}
+
+print('--- Set Operations ---')
+print(f'Alice friends : {alice_friends}')
+print(f'Bob friends   : {bob_friends}')
+
+union        = alice_friends | bob_friends
+intersection = alice_friends & bob_friends
+difference   = alice_friends - bob_friends
+sym_diff     = alice_friends ^ bob_friends
+
+print(f'\nUnion (all connections)       : {union}')
+print(f'Intersection (mutual friends) : {intersection}')
+print(f'Difference (Alice only)       : {difference}')
+print(f'Symmetric Difference          : {sym_diff}')
+
+# Mutual friends between Alice and Carol
+mutual_ac = alice_friends & carol_friends
+print(f'\nAlice & Carol mutual friends  : {mutual_ac}')
+```
+
+---
+
+## (d) How Graph Algorithms Improve Recommendations
+
+Social media platforms translate friendship data into valuable suggestions using graph algorithms in several ways:
+
+- **Mutual friends (set intersection):** If Alice and Carol share three mutual friends but are not yet connected, the platform flags Carol as a strong recommendation for Alice.
+- **BFS degree expansion:** BFS identifies degree-2 connections — friends of friends — who share many edges with you but are not yet direct friends. These are the highest-quality recommendations.
+- **Community detection:** Algorithms such as Louvain clustering identify dense sub-graphs (communities). Users within the same community who are not yet connected are likely to have shared interests.
+- **Graph centrality:** Highly connected users (high degree centrality) are surfaced as suggested follows, since connecting with them exposes you to a wider community.
+
+In practice, platforms such as LinkedIn (*People You May Know*) and Facebook (*Friend Suggestions*) use combinations of BFS, Jaccard similarity on adjacency sets, and machine learning trained on graph features to rank recommendations by relevance.
+
+---
+
+# Question 4: Search Algorithm Comparison — Online Supermarket
+
+This question compares Linear Search and Binary Search in terms of correctness, time complexity, and empirical performance under increasing dataset sizes.
+
+---
+
+## (a) Python Implementations
+
+```python
+# Linear Search — examines each element in turn
+def linear_search(arr, target):
+    """Return index of target or -1 if not found."""
+    for i, item in enumerate(arr):
+        if item == target:
+            return i
+    return -1
+
+
+# Binary Search — requires sorted array; halves search space each step
+def binary_search(arr, target):
+    """Return index of target in sorted arr, or -1 if not found."""
+    low, high = 0, len(arr) - 1
+    while low <= high:
+        mid = (low + high) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            low = mid + 1
+        else:
+            high = mid - 1
+    return -1
+
+
+# --- Correctness Tests ---
+products = sorted([f'product_{i:04d}' for i in range(1, 1001)])
+target   = 'product_0750'
+
+li = linear_search(products, target)
+bi = binary_search(products, target)
+print(f'Linear Search  found "{target}" at index {li}')
+print(f'Binary Search  found "{target}" at index {bi}')
+
+missing = 'product_9999'
+print(f'Linear Search  for missing item: {linear_search(products, missing)}')
+print(f'Binary Search  for missing item: {binary_search(products, missing)}')
+```
+
+---
+
+## (b) Time Complexity Analysis
+
+| Case | Linear Search | Binary Search |
+|---|---|---|
+| Best Case | O(1) — first element matches | O(1) — middle element matches |
+| Average Case | O(n) — scan half the list | O(log n) — halve search space |
+| Worst Case | O(n) — last or not found | O(log n) — last split |
+| Space | O(1) — no extra memory | O(1) — iterative version |
+| Pre-condition | None — works on unsorted data | Array must be sorted first |
+
+> For a product database of one million items, Binary Search requires at most **20 comparisons** (log₂ 1,000,000 ≈ 20), while Linear Search may inspect all one million records.
+
+---
+
+## (c) Execution Time Measurement
+
+```python
+import time, random
+
+def benchmark(sizes):
+    print(f'\n{"Size":>10}  {"Linear (ms)":>14}  {"Binary (ms)":>14}')
+    print('-' * 44)
+    for n in sizes:
+        data   = sorted(random.sample(range(n * 10), n))
+        target = random.choice(data)
+
+        t0 = time.perf_counter()
+        for _ in range(500): linear_search(data, target)
+        linear_ms = (time.perf_counter() - t0) / 500 * 1000
+
+        t0 = time.perf_counter()
+        for _ in range(500): binary_search(data, target)
+        binary_ms = (time.perf_counter() - t0) / 500 * 1000
+
+        print(f'{n:>10,}  {linear_ms:>14.4f}  {binary_ms:>14.4f}')
+
+
+benchmark([1_000, 5_000, 10_000, 50_000, 100_000])
+```
+
+---
+
+## (d) Matplotlib Performance Plot
+
+```python
+import matplotlib.pyplot as plt
+import time, random
+
+sizes = [1_000, 5_000, 10_000, 50_000, 100_000, 500_000]
+linear_times, binary_times = [], []
+
+for n in sizes:
+    data   = sorted(random.sample(range(n * 10), n))
+    target = data[n // 2]
+
+    t0 = time.perf_counter()
+    for _ in range(200): linear_search(data, target)
+    linear_times.append((time.perf_counter() - t0) / 200 * 1000)
+
+    t0 = time.perf_counter()
+    for _ in range(200): binary_search(data, target)
+    binary_times.append((time.perf_counter() - t0) / 200 * 1000)
+
+plt.figure(figsize=(9, 5))
+plt.plot(sizes, linear_times, 'o-', color='crimson',   label='Linear Search O(n)')
+plt.plot(sizes, binary_times, 's-', color='steelblue', label='Binary Search O(log n)')
+plt.xlabel('Dataset Size (number of products)')
+plt.ylabel('Average Execution Time (ms)')
+plt.title('Linear vs Binary Search — Performance Comparison')
+plt.legend()
+plt.tight_layout()
+plt.savefig('search_comparison.png', dpi=150)
+plt.show()
+
+# INTERPRETATION:
+# Linear Search time grows linearly with n — doubling the dataset roughly
+# doubles the search time. Binary Search remains nearly flat because each
+# comparison halves the remaining space. For large product databases,
+# Binary Search is drastically more efficient.
+```
+
+---
+
+# Question 5: Delivery Route Optimization — East Africa Logistics
+
+This question evaluates three algorithmic paradigms — Greedy, Dynamic Programming, and Backtracking — for optimizing delivery routes across East African cities.
+
+---
+
+## (a) Greedy Algorithm — Nearest Neighbour
+
+A greedy algorithm makes the locally optimal choice at each step. Here, the courier always travels to the unvisited destination closest to the current location.
+
+```python
+# Greedy Nearest-Neighbour Delivery Route
+import math
+
+# Delivery locations with (latitude, longitude) approximations
+locations = {
+    'Kigali':        (-1.94, 30.06),
+    'Kampala':       ( 0.32, 32.58),
+    'Nairobi':       (-1.29, 36.82),
+    'Dar es Salaam': (-6.80, 39.27),
+    'Mombasa':       (-4.05, 39.67),
+}
+
+def distance(c1, c2):
+    return math.sqrt((c1[0] - c2[0])**2 + (c1[1] - c2[1])**2)
+
+def greedy_route(start):
+    """Build route by always visiting nearest unvisited city."""
+    unvisited  = set(locations.keys()) - {start}
+    route      = [start]
+    current    = start
+    total_dist = 0.0
+
+    while unvisited:
+        nearest = min(unvisited, key=lambda c: distance(locations[current], locations[c]))
+        total_dist += distance(locations[current], locations[nearest])
+        route.append(nearest)
+        current = nearest
+        unvisited.remove(nearest)
+
+    total_dist += distance(locations[current], locations[start])  # return home
+    route.append(start)
+    return route, total_dist
+
+
+route, dist = greedy_route('Kigali')
+print('Greedy Route:', ' -> '.join(route))
+print(f'Total Distance (degree units): {dist:.3f}')
+```
+
+---
+
+## (b) Dynamic Programming — Minimum Cost Path
+
+Dynamic Programming solves the optimal sub-problem once and caches the result, avoiding redundant recomputation. Below we find the minimum cost path between two cities using Floyd-Warshall all-pairs shortest path.
+
+```python
+# DP: Minimum Transportation Cost (Floyd-Warshall)
+INF    = float('inf')
+CITIES = ['Kigali', 'Kampala', 'Nairobi', 'Dar es Salaam', 'Mombasa']
+
+C = [  # cost in USD (INF = no direct link)
+    [0,   150, 250, 300, INF],
+    [150,   0, 200, INF, INF],
+    [250, 200,   0, 180, 100],
+    [300, INF, 180,   0,  80],
+    [INF, INF, 100,  80,   0],
+]
+n = len(CITIES)
+
+def floyd_warshall():
+    """All-pairs shortest cost using Floyd-Warshall DP."""
+    dist      = [row[:] for row in C]
+    next_city = [[j if C[i][j] < INF else None for j in range(n)] for i in range(n)]
+
+    for k in range(n):
+        for i in range(n):
+            for j in range(n):
+                if dist[i][k] + dist[k][j] < dist[i][j]:
+                    dist[i][j]      = dist[i][k] + dist[k][j]
+                    next_city[i][j] = next_city[i][k]
+    return dist, next_city
+
+def get_path(next_city, src, dst):
+    if next_city[src][dst] is None:
+        return []
+    path = [src]
+    while src != dst:
+        src = next_city[src][dst]
+        path.append(src)
+    return path
+
+
+dist, nxt   = floyd_warshall()
+src, dst    = 0, 4  # Kigali -> Mombasa
+path_idx    = get_path(nxt, src, dst)
+path_names  = [CITIES[i] for i in path_idx]
+
+print(f'Cheapest route: {" -> ".join(path_names)}')
+print(f'Minimum cost  : USD {dist[src][dst]}')
+```
+
+---
+
+## (c) Backtracking — All Valid Routes
+
+Backtracking explores all possible paths, pruning those that violate constraints (e.g., exceeding a maximum cost budget).
+
+```python
+# Backtracking: find all delivery routes within a cost budget
+MAX_COST = 500  # USD budget constraint
+
+def backtrack_routes(current, visited, path, cost, all_routes):
+    if len(visited) == n:
+        all_routes.append((path[:], cost))
+        return
+
+    for nxt_city in range(n):
+        if nxt_city not in visited and C[current][nxt_city] < INF:
+            new_cost = cost + C[current][nxt_city]
+            if new_cost <= MAX_COST:
+                visited.add(nxt_city)
+                path.append(nxt_city)
+                backtrack_routes(nxt_city, visited, path, new_cost, all_routes)
+                path.pop()
+                visited.remove(nxt_city)
+
+
+all_routes = []
+backtrack_routes(0, {0}, [0], 0, all_routes)
+
+print(f'\nValid routes from Kigali within USD {MAX_COST}:')
+for route, cost in all_routes[:5]:
+    names = ' -> '.join(CITIES[i] for i in route)
+    print(f'  {names}  | Cost: USD {cost}')
+print(f'Total valid routes found: {len(all_routes)}')
+```
+
+---
+
+## (d) Algorithm Comparison
+
+| Criterion | Greedy | Dynamic Programming | Backtracking |
+|---|---|---|---|
+| Time Complexity | O(n²) | O(n³) Floyd-Warshall | O(n!) worst case |
+| Space Complexity | O(n) | O(n²) | O(n) call stack |
+| Solution Quality | Approximate — often suboptimal | Optimal | Optimal (all valid paths) |
+| Speed (large n) | Very fast | Moderate | Extremely slow |
+| Best Use Case | Quick estimates, real-time dispatch | Pre-computed optimal paths | Small networks, constraint checking |
+
+> **Conclusion:** For a logistics company, a hybrid approach is recommended — use DP to pre-compute optimal inter-city costs, and Greedy nearest-neighbour for real-time driver dispatch where speed outweighs perfect optimality.
+
+---
+
+# Question 6: Intelligent Road Navigation System
+
+This question builds a weighted road network graph and applies Dijkstra's shortest path, BFS/DFS traversal, and Prim's Minimum Spanning Tree algorithms.
+
+---
+
+## (a) Weighted Graph using Adjacency List
+
+```python
+# Weighted Road Navigation Graph
+from heapq import heappush, heappop
+from collections import deque
+
+# Graph: adjacency list {city: [(neighbour, distance_km), ...]}
+road_graph = {
+    'Kigali':  [('Musanze', 110), ('Huye', 130), ('Kayonza', 75)],
+    'Musanze': [('Kigali', 110), ('Rubavu', 60)],
+    'Rubavu':  [('Musanze', 60), ('Rusizi', 220)],
+    'Huye':    [('Kigali', 130), ('Rusizi', 90)],
+    'Rusizi':  [('Huye', 90), ('Rubavu', 220)],
+    'Kayonza': [('Kigali', 75), ('Kirehe', 85)],
+    'Kirehe':  [('Kayonza', 85)],
+}
+
+def display_graph(g):
+    print("\n--- Road Network (Adjacency List) ---")
+    for city, roads in g.items():
+        links = ", ".join(f"{n}({d}km)" for n, d in roads)
+        print(f"  {city:12s} --> {links}")
+
+display_graph(road_graph)
+```
+
+---
+
+## (b) Dijkstra's Shortest Path
+
+```python
+def dijkstra(graph, start, end):
+    """Return shortest distance and path from start to end."""
+    dist = {city: float('inf') for city in graph}
+    dist[start] = 0
+    prev = {city: None for city in graph}
+    pq   = [(0, start)]
+
+    while pq:
+        d, u = heappop(pq)
+        if d > dist[u]:
+            continue
+        for v, w in graph[u]:
+            if dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
+                prev[v] = u
+                heappush(pq, (dist[v], v))
+
+    # Reconstruct path
+    path, node = [], end
+    while node:
+        path.append(node)
+        node = prev[node]
+    return dist[end], list(reversed(path))
+
+
+d, path = dijkstra(road_graph, 'Kigali', 'Rusizi')
+print(f'\nShortest path Kigali -> Rusizi: {" -> ".join(path)}')
+print(f'Distance: {d} km')
+```
+
+---
+
+## (c) BFS and DFS Traversal
+
+```python
+def bfs_traverse(graph, start):
+    """Breadth-first traversal of road network."""
+    visited, queue, order = set(), deque([start]), []
+    visited.add(start)
+    while queue:
+        city = queue.popleft()
+        order.append(city)
+        for neighbour, _ in graph[city]:
             if neighbour not in visited:
                 visited.add(neighbour)
                 queue.append(neighbour)
     return order
 
-bfs(graph, "Victor")
+
+def dfs_traverse(graph, start, visited=None, order=None):
+    """Depth-first traversal of road network."""
+    if visited is None:
+        visited, order = set(), []
+    visited.add(start)
+    order.append(start)
+    for neighbour, _ in graph[start]:
+        if neighbour not in visited:
+            dfs_traverse(graph, neighbour, visited, order)
+    return order
+
+
+print('BFS:', ' -> '.join(bfs_traverse(road_graph, 'Kigali')))
+print('DFS:', ' -> '.join(dfs_traverse(road_graph, 'Kigali')))
 ```
-
-**Output (verified):** `['Victor', 'Alice', 'Bob', 'David']`
-
-**Time Complexity:** O(V + E), where V = number of users, E = number of friendships.
-
-## (c) Finding Mutual Friends Using Python Sets
-
-```python
-def mutual_friends(graph, user1, user2):
-    return set(graph[user1]) & set(graph[user2])
-
-print(mutual_friends(graph, "Victor", "Alice"))   # {'Bob'}
-```
-
-- `set(graph[user1])` converts the first user's friends into a set.
-- `set(graph[user2])` converts the second user's friends into a set.
-- `&` returns the elements common to both sets.
-
-## (d) Displaying the Full Graph Structure
-
-```python
-def display_graph(graph):
-    for user, friends in graph.items():
-        print(f"{user} -> {friends}")
-
-display_graph(graph)
-```
-
-The adjacency list is memory-efficient: each key is a vertex, each list holds only the *existing* adjacent vertices, unlike an adjacency matrix which allocates O(V²) space regardless of sparsity.
-
-### Complexity Summary
-
-| Operation | Complexity |
-|---|---|
-| BFS / DFS Traversal | O(V + E) |
-| Mutual Friends (set intersection) | O(min(\|F₁\|, \|F₂\|)) average |
-| Display Full Graph | O(V + E) |
 
 ---
 
-# QUESTION 4: Search Algorithms and Complexity Analysis
+## (d) Prim's Minimum Spanning Tree
 
-## Introduction
-
-Search algorithms are essential for locating information efficiently. In an e-commerce platform, thousands or millions of products may be stored, making efficient search critical for response time under heavy traffic.
-
-## (a) Linear Search and Binary Search
+A Minimum Spanning Tree (MST) connects all cities with the minimum total road length, avoiding cycles. In infrastructure planning, the MST reveals which roads must exist to keep the network connected at minimum construction cost.
 
 ```python
-def linear_search(arr, target):
-    for index in range(len(arr)):
-        if arr[index] == target:
-            return index
-    return -1
+import heapq
 
-products = [101, 205, 310, 415, 520]
-result = linear_search(products, 415)
-print("Product found at index:", result)
+def prims_mst(graph):
+    """Find Minimum Spanning Tree using Prim's algorithm."""
+    start   = next(iter(graph))
+    visited = {start}
+    edges   = [(w, start, v) for v, w in graph[start]]
+    mst, total = [], 0
+    heapq.heapify(edges)
+
+    while edges and len(visited) < len(graph):
+        w, u, v = heapq.heappop(edges)
+        if v in visited:
+            continue
+        visited.add(v)
+        mst.append((u, v, w))
+        total += w
+        for neighbour, cost in graph[v]:
+            if neighbour not in visited:
+                heapq.heappush(edges, (cost, v, neighbour))
+
+    return mst, total
+
+
+mst_edges, mst_cost = prims_mst(road_graph)
+print("\nPrim's MST:")
+for u, v, w in mst_edges:
+    print(f'  {u:12s} <-> {v:12s}  {w} km')
+print(f'Total MST distance: {mst_cost} km')
+
+# Infrastructure planning insight:
+# The MST tells planners the minimum road network to keep all cities connected.
+# Removing any MST edge disconnects the network.
+# Edges beyond the MST provide route redundancy.
 ```
-
-| Case | Complexity |
-|---|---|
-| Best | O(1) |
-| Average | O(n) |
-| Worst | O(n) |
-
-```python
-def binary_search(arr, target):
-    left, right = 0, len(arr) - 1
-    while left <= right:
-        mid = (left + right) // 2
-        if arr[mid] == target:
-            return mid
-        elif arr[mid] < target:
-            left = mid + 1
-        else:
-            right = mid - 1
-    return -1
-```
-
-| Case | Complexity |
-|---|---|
-| Best | O(1) |
-| Average | O(log n) |
-| Worst | O(log n) |
-
-Both implementations were stress-tested against 200 randomized inputs (cross-checked with Python's `list.index()`), confirming correctness including the not-found case.
-
-## (b) Measuring Execution Time
-
-```python
-import time
-
-data = list(range(100000))
-target = 99999
-
-start = time.perf_counter(); linear_search(data, target); linear_time = time.perf_counter() - start
-start = time.perf_counter(); binary_search(data, target); binary_time = time.perf_counter() - start
-
-print("Linear Search Time:", linear_time)
-print("Binary Search Time:", binary_time)
-```
-
-Measured result (see notebook for the live run): Binary Search is on the order of **1,000×+ faster** than Linear Search at n = 100,000, consistent with O(log n) vs O(n) growth.
-
-## (c) Comparison of O(1), O(log n), O(n), O(n²)
-
-| Complexity | Description | Example |
-|---|---|---|
-| O(1) | Constant Time | Dictionary lookup |
-| O(log n) | Logarithmic Time | Binary Search |
-| O(n) | Linear Time | Linear Search |
-| O(n²) | Quadratic Time | Bubble Sort (nested loop) |
-
-- **O(1):** `student["Name"]` — same speed whether the dictionary has 10 or 10 million records.
-- **O(log n):** Binary Search on 1,000,000 elements needs only `log₂(1,000,000) ≈ 20` comparisons.
-- **O(n):** `for item in products: print(item)` — every element visited exactly once.
-- **O(n²):** a loop nested inside another loop — doubling input size roughly quadruples the work.
-
-## (d) Plotting Execution Time Using Matplotlib
-
-```python
-import matplotlib.pyplot as plt
-
-algorithms = ["Linear Search", "Binary Search"]
-times = [linear_time, binary_time]
-
-plt.bar(algorithms, times, color=["blue", "green"])
-plt.title("Execution Time Comparison")
-plt.xlabel("Search Algorithm")
-plt.ylabel("Time (seconds)")
-plt.show()
-```
-
-The resulting chart (rendered live in the companion notebook) shows a visibly tall bar for Linear Search and a near-invisible bar for Binary Search, directly illustrating the efficiency gained from the divide-and-conquer approach.
 
 ---
 
-# QUESTION 5: Algorithm Design Strategies for Logistics
+# Question 7: Student Performance Analytics — Sorting Algorithms
 
-## Introduction
-
-Logistics companies must determine efficient delivery routes while minimizing transportation cost and delivery time. Different design strategies trade off speed, optimality, and exhaustiveness.
-
-## (a) Greedy Algorithm for Route Selection
-
-```python
-def greedy_route(distance_matrix, start, city_names):
-    n = len(distance_matrix)
-    visited = [False] * n
-    visited[start] = True
-    route = [start]
-    total_cost = 0
-    current = start
-    for _ in range(n - 1):
-        nearest, nearest_cost = None, float('inf')
-        for city in range(n):
-            if not visited[city] and distance_matrix[current][city] < nearest_cost:
-                nearest, nearest_cost = city, distance_matrix[current][city]
-        visited[nearest] = True
-        route.append(nearest)
-        total_cost += nearest_cost
-        current = nearest
-    return [city_names[i] for i in route], total_cost
-
-city_names = ["Kigali", "Musanze", "Rubavu", "Huye"]
-dist = [
-    [0, 60, 95, 135],
-    [60, 0, 35, 190],
-    [95, 35, 0, 220],
-    [135, 190, 220, 0],
-]
-print(greedy_route(dist, 0, city_names))
-```
-
-**Complexity: O(n²)**
-
-## (b) Dynamic Programming for Cost Optimization
-
-```python
-def min_delivery_cost(distance_matrix, start, must_visit):
-    n = len(must_visit)
-    full_set = (1 << n) - 1
-    memo = {}
-    def dp(pos, visited_mask):
-        if visited_mask == full_set:
-            return distance_matrix[pos][start]
-        if (pos, visited_mask) in memo:
-            return memo[(pos, visited_mask)]
-        best = float('inf')
-        for nxt in range(n):
-            if not (visited_mask & (1 << nxt)):
-                cost = distance_matrix[pos][must_visit[nxt]] + dp(must_visit[nxt], visited_mask | (1 << nxt))
-                best = min(best, cost)
-        memo[(pos, visited_mask)] = best
-        return best
-    return dp(start, 0)
-
-print(min_delivery_cost(dist, 0, [1, 2, 3]))
-```
-
-**Complexity: O(n² × 2ⁿ)**
-
-> **✅ Verified:** the DP result (450 km round-trip) was cross-checked against an independent brute-force search over all permutations and matched exactly, proving the memoized solution is optimal, not merely plausible.
-
-## (c) Backtracking for Constrained Route Selection
-
-```python
-def constrained_routes(city_names, distance_matrix, max_budget):
-    results = []
-    def backtrack(path, visited, cost):
-        if cost > max_budget:
-            return
-        if len(path) == len(city_names):
-            results.append((path, cost))
-            return
-        last = path[-1]
-        for nxt in range(len(city_names)):
-            if nxt not in visited:
-                backtrack(path + [nxt], visited | {nxt}, cost + distance_matrix[last][nxt])
-    backtrack([0], {0}, 0)
-    return results
-
-valid_routes = constrained_routes(city_names, dist, 420)
-print(valid_routes)
-```
-
-**Complexity: O(n!) in the worst case** (mitigated in practice by the budget-pruning condition).
-
-## (d) Performance Comparison
-
-| Strategy | Optimal Solution? | Time Complexity | Characteristics |
-|---|---|---|---|
-| Greedy | Not always | O(n²) | Fast, simple, locally optimal |
-| Dynamic Programming | Yes | O(n² × 2ⁿ) | Exact solution via memoization |
-| Backtracking | Yes (exhaustive) | O(n!) | Explores all possibilities with pruning |
-
-Greedy algorithms are fastest but may not produce the globally optimal route. Dynamic Programming guarantees the optimal solution but requires exponentially more memory and computation as city count grows. Backtracking guarantees completeness (finds every feasible route under a constraint) but becomes expensive for large problem sizes — pruning (the `cost > max_budget` check) is what keeps it tractable in practice.
+This question implements and compares Bubble Sort and Merge Sort for ordering student examination scores in a university analytics system.
 
 ---
 
-# QUESTION 6: Sorting Algorithms for Academic Records
-
-## Introduction
-
-Sorting algorithms organize records to improve searching, reporting, and data management. Universities commonly sort student records by registration number, marks, or name.
-
-## (a) Bubble Sort
+## (a) Bubble Sort and Merge Sort
 
 ```python
+# Bubble Sort: repeatedly swap adjacent elements if out of order
 def bubble_sort(arr):
-    n = len(arr)
+    a = arr[:]
+    n = len(a)
     for i in range(n):
+        swapped = False
         for j in range(0, n - i - 1):
-            if arr[j] > arr[j + 1]:
-                arr[j], arr[j + 1] = arr[j + 1], arr[j]
-    return arr
-```
-**Complexity: O(n²)**
+            if a[j] > a[j + 1]:
+                a[j], a[j + 1] = a[j + 1], a[j]
+                swapped = True
+        if not swapped:   # already sorted — early exit
+            break
+    return a
 
-## (b) Selection Sort
 
-```python
-def selection_sort(arr):
-    n = len(arr)
-    for i in range(n):
-        min_index = i
-        for j in range(i + 1, n):
-            if arr[j] < arr[min_index]:
-                min_index = j
-        arr[i], arr[min_index] = arr[min_index], arr[i]
-    return arr
-```
-**Complexity: O(n²)**
-
-## (c) Merge Sort
-
-```python
+# Merge Sort: divide-and-conquer — split, sort halves, merge
 def merge_sort(arr):
     if len(arr) <= 1:
         return arr
-    mid = len(arr) // 2
-    left = merge_sort(arr[:mid])
+    mid   = len(arr) // 2
+    left  = merge_sort(arr[:mid])
     right = merge_sort(arr[mid:])
+    return merge(left, right)
+
+def merge(left, right):
     result, i, j = [], 0, 0
     while i < len(left) and j < len(right):
         if left[i] <= right[j]:
@@ -566,453 +925,402 @@ def merge_sort(arr):
     result.extend(left[i:])
     result.extend(right[j:])
     return result
+
+
+# --- Test ---
+scores = [78, 45, 92, 61, 33, 88, 71, 55, 99, 40]
+print('Original:', scores)
+print('Bubble  :', bubble_sort(scores))
+print('Merge   :', merge_sort(scores))
 ```
-**Complexity: O(n log n)**
-
-All three implementations were verified correct against Python's built-in `sorted()` across 50 randomized trials, including empty lists, single elements, duplicates, and negative numbers.
-
-## (d) Comparison of Sorting Algorithms
-
-| Algorithm | Time Complexity | Efficiency |
-|---|---|---|
-| Bubble Sort | O(n²) | Poor for large datasets |
-| Selection Sort | O(n²) | Slightly fewer swaps, still quadratic |
-| Merge Sort | O(n log n) | Best for large datasets |
-
-**Conclusion:** Merge Sort is preferred for academic record systems because it scales efficiently as the number of student records increases — confirmed empirically in the notebook, where Merge Sort dramatically outperforms the other two on a reverse-sorted 2,000-record worst case.
 
 ---
 
-# QUESTION 7: Hashing and Tree Data Structures
+## (b) Time Complexity Comparison
 
-## Introduction
-
-Banking systems require fast account retrieval. Hash tables provide near-constant retrieval time; Binary Search Trees (BSTs) maintain ordered data but can degrade to linear time; AVL trees fix that with self-balancing.
-
-## (a) Hash Table Implementation
-
-```python
-class HashTable:
-    def __init__(self, size=10):
-        self.size = size
-        self.table = [[] for _ in range(size)]
-
-    def _hash(self, key):
-        return sum(ord(c) for c in str(key)) % self.size
-
-    def insert(self, key, value):
-        index = self._hash(key)
-        for i, (k, v) in enumerate(self.table[index]):
-            if k == key:
-                self.table[index][i] = (key, value)
-                return
-        self.table[index].append((key, value))
-
-    def get(self, key):
-        index = self._hash(key)
-        for k, v in self.table[index]:
-            if k == key:
-                return v
-        return None
-
-ht = HashTable()
-ht.insert("ACC001", "Victor")
-ht.insert("ACC002", "Alice")
-print(ht.get("ACC001"))
-```
-
-> **🔧 Fix applied:** the original `insert` always appended, so re-inserting an existing key created a duplicate entry instead of updating it (a real bug for a banking system, where re-inserting an account should update it). The fixed version checks for an existing key first.
-
-## (b) Collision Handling Techniques
-
-**Chaining** (implemented above) — each bucket stores a list of entries; multiple colliding keys simply coexist in that list. Verified directly by forcing two keys (`"AB"`, `"BA"`) into the same bucket and confirming both are still retrievable.
-
-**Linear Probing** (alternative open-addressing approach) — on collision, search sequentially for the next free slot:
-```python
-index = (index + 1) % table_size
-```
-
-### Complexity
-
-| Operation | Complexity (average) |
-|---|---|
-| Insert | O(1) |
-| Search | O(1) |
-| Delete | O(1) |
-
-## (c) Binary Search Tree (BST)
-
-```python
-class Node:
-    def __init__(self, key):
-        self.key = key
-        self.left = None
-        self.right = None
-
-class BST:
-    def __init__(self):
-        self.root = None
-    def insert(self, key):
-        self.root = self._insert(self.root, key)
-    def _insert(self, node, key):
-        if node is None:
-            return Node(key)
-        if key < node.key:
-            node.left = self._insert(node.left, key)
-        elif key > node.key:
-            node.right = self._insert(node.right, key)
-        return node
-
-tree = BST()
-for k in [50, 30, 70, 20, 40, 60, 80]:
-    tree.insert(k)
-```
-
-## (d) BST vs AVL Tree Performance
-
-> **🔧 Major enhancement:** the original draft only *asserted* the BST-vs-AVL comparison as a table, without an actual AVL implementation. A complete AVL tree (with all four rotation cases — Left-Left, Right-Right, Left-Right, Right-Left) is implemented and the performance claim is **empirically proven**, not just stated.
-
-```python
-class AVLNode:
-    def __init__(self, key):
-        self.key = key
-        self.left = None
-        self.right = None
-        self.height = 1
-
-class AVLTree:
-    def __init__(self):
-        self.root = None
-    def _h(self, node):
-        return node.height if node else 0
-    def _balance_factor(self, node):
-        return self._h(node.left) - self._h(node.right) if node else 0
-    def _update_height(self, node):
-        node.height = 1 + max(self._h(node.left), self._h(node.right))
-    def _rotate_right(self, y):
-        x, t2 = y.left, y.left.right
-        x.right, y.left = y, t2
-        self._update_height(y); self._update_height(x)
-        return x
-    def _rotate_left(self, x):
-        y, t2 = x.right, x.right.left
-        y.left, x.right = x, t2
-        self._update_height(x); self._update_height(y)
-        return y
-    def insert(self, key):
-        self.root = self._insert(self.root, key)
-    def _insert(self, node, key):
-        if node is None:
-            return AVLNode(key)
-        if key < node.key:
-            node.left = self._insert(node.left, key)
-        elif key > node.key:
-            node.right = self._insert(node.right, key)
-        else:
-            return node
-        self._update_height(node)
-        balance = self._balance_factor(node)
-        if balance > 1 and key < node.left.key:
-            return self._rotate_right(node)
-        if balance < -1 and key > node.right.key:
-            return self._rotate_left(node)
-        if balance > 1 and key > node.left.key:
-            node.left = self._rotate_left(node.left)
-            return self._rotate_right(node)
-        if balance < -1 and key < node.right.key:
-            node.right = self._rotate_right(node.right)
-            return self._rotate_left(node)
-        return node
-    def height(self):
-        return self._h(self.root)
-```
-
-**Empirical proof (measured in the notebook):**
-- Plain BST after inserting sorted keys `1..10`: **height = 10** (degenerates into a linked list — the true worst case).
-- AVL tree after inserting the *same* sorted keys `1..10`: **height ≤ 4** (theoretical minimum ≈ log₂10 ≈ 3.3).
-- On 5,000 random keys: the AVL tree's height tracked close to the theoretical log₂(5000) ≈ 12.3 bound, while the plain BST's height was measurably larger.
-
-| Feature | BST | AVL Tree |
+| Property | Bubble Sort | Merge Sort |
 |---|---|---|
-| Balance | Not guaranteed | Self-balancing via rotations |
-| Search (worst case) | O(n) | O(log n) |
-| Insert (worst case) | O(n) | O(log n) |
-| Measured height, sorted 1–10 | 10 | ≤ 4 |
-
-**Conclusion:** AVL trees are preferable for a banking system because account numbers are often issued sequentially — exactly the input order that causes a plain BST to degrade to O(n) lookups. The AVL tree's self-balancing guarantees O(log n) regardless of insertion order.
+| Best Case | O(n) — with early-exit flag | O(n log n) |
+| Average Case | O(n²) | O(n log n) |
+| Worst Case | O(n²) | O(n log n) |
+| Space | O(1) — in-place | O(n) — merge buffers |
+| Stability | Stable | Stable |
+| Adaptive | Yes (with flag) | No |
 
 ---
 
-# QUESTION 8: Graph Algorithms for Transport Systems
-
-## Introduction
-
-Road networks can be represented using weighted graphs where cities are vertices and roads are weighted edges. Graph algorithms help determine optimal routes and network structures.
-
-## (a) BFS and DFS Traversal
+## (c) Execution Time Benchmark
 
 ```python
+import time, random
+import matplotlib.pyplot as plt
+
+sizes = [100, 500, 1_000, 3_000, 5_000]
+bubble_times, merge_times = [], []
+
+for n in sizes:
+    data = [random.randint(0, 10_000) for _ in range(n)]
+
+    t0 = time.perf_counter()
+    bubble_sort(data)
+    bubble_times.append(time.perf_counter() - t0)
+
+    t0 = time.perf_counter()
+    merge_sort(data)
+    merge_times.append(time.perf_counter() - t0)
+
+plt.figure(figsize=(9, 5))
+plt.plot(sizes, bubble_times, 'o-', color='tomato',    label='Bubble Sort O(n²)')
+plt.plot(sizes, merge_times,  's-', color='royalblue', label='Merge Sort O(n log n)')
+plt.xlabel('Number of Student Records')
+plt.ylabel('Execution Time (seconds)')
+plt.title('Bubble Sort vs Merge Sort — Performance')
+plt.legend()
+plt.tight_layout()
+plt.savefig('sorting_benchmark.png', dpi=150)
+plt.show()
+```
+
+---
+
+## (d) Recommendation for Large Educational Datasets
+
+Merge Sort is strongly recommended for large educational datasets:
+
+- **Bubble Sort** degrades to O(n²) for random or reverse-sorted data. With 100,000 student records, this translates to roughly 10 billion comparisons — unacceptable in a production system.
+- **Merge Sort** guarantees O(n log n) in all cases. Even in the worst case, 100,000 records require only about 1.7 million comparisons.
+- Merge Sort is **stable**, preserving the relative order of students with equal scores — important when secondary sort criteria (e.g., student ID) must be respected.
+- The O(n) extra space is entirely acceptable given the performance gain; modern servers have ample RAM.
+
+For very large datasets stored externally, an **External Merge Sort** variant that merges sorted file chunks would be the enterprise-level solution.
+
+---
+
+# Question 8: Hospital Patient Queue Management System
+
+This question designs a patient queue system with priority-based triage for an emergency department, where critical patients must be attended before lower-priority cases regardless of arrival order.
+
+---
+
+## (a) Role of Queue Data Structures in Healthcare
+
+A queue is a First-In, First-Out (FIFO) data structure that models any waiting-line scenario. In healthcare:
+
+- **Standard queues** manage patient registration and general appointment scheduling by preserving arrival order.
+- **Priority queues** override strict FIFO when medical urgency demands it — a cardiac arrest patient must bypass routine consultations.
+- **Queues support multi-department routing:** a patient dequeued from triage is enqueued into radiology, pharmacy, or a ward queue.
+- They provide measurable **throughput metrics** (average wait time, queue length) that hospital administrators use to allocate staff.
+
+Without queue data structures, emergency departments would rely on manual lists prone to human error, delays, and missed critical cases.
+
+---
+
+## (b) Queue Using Python Lists
+
+```python
+# Basic FIFO Queue using Python deque
 from collections import deque
 
-def bfs(graph, start):
-    visited = {start}
-    queue = deque([start])
-    while queue:
-        node = queue.popleft()
-        print(node)
-        for neighbour in graph[node]:
-            if neighbour not in visited:
-                visited.add(neighbour)
-                queue.append(neighbour)
+class PatientQueue:
+    """Simple FIFO queue for general patient management."""
 
-def dfs(graph, node, visited=None):
-    if visited is None:
-        visited = set()
-    visited.add(node)
-    print(node)
-    for neighbour in graph[node]:
-        if neighbour not in visited:
-            dfs(graph, neighbour, visited)
+    def __init__(self):
+        self._queue = deque()
+
+    def enqueue(self, patient):
+        self._queue.append(patient)
+        print(f"  Registered: {patient}")
+
+    def dequeue(self):
+        if self.is_empty():
+            print("  No patients in queue.")
+            return None
+        patient = self._queue.popleft()
+        print(f"  Called to consultation: {patient}")
+        return patient
+
+    def is_empty(self): return len(self._queue) == 0
+    def size(self):     return len(self._queue)
+    def peek(self):     return self._queue[0] if self._queue else None
+
+
+# Demo
+q = PatientQueue()
+q.enqueue("Alice — General Checkup")
+q.enqueue("Bob   — Routine Vaccination")
+q.enqueue("Carol — Blood Test")
+print(f'  Queue size: {q.size()}')
+q.dequeue()
+q.dequeue()
 ```
-**Complexity: O(V + E)** for both.
 
-## (b) Dijkstra's Algorithm
+---
+
+## (c) Priority Queue for Emergency Patients
+
+Emergency triage assigns each patient a numeric priority: **1 = Critical, 2 = Urgent, 3 = Semi-urgent, 4 = Non-urgent**. Python's `heapq` module provides an efficient min-heap that always pops the smallest (highest-priority) value.
 
 ```python
 import heapq
 
-def dijkstra(graph, start):
-    distances = {node: float('inf') for node in graph}
-    distances[start] = 0
-    pq = [(0, start)]
-    while pq:
-        current_distance, current_node = heapq.heappop(pq)
-        if current_distance > distances[current_node]:
-            continue
-        for neighbour, weight in graph[current_node]:
-            distance = current_distance + weight
-            if distance < distances[neighbour]:
-                distances[neighbour] = distance
-                heapq.heappush(pq, (distance, neighbour))
-    return distances
+class EmergencyQueue:
+    """Priority queue where lower priority number = higher urgency."""
+
+    PRIORITY_LABELS = {1: 'CRITICAL', 2: 'URGENT', 3: 'SEMI-URGENT', 4: 'NON-URGENT'}
+
+    def __init__(self):
+        self._heap    = []
+        self._counter = 0  # tie-break by arrival order
+
+    def admit(self, name, priority):
+        heapq.heappush(self._heap, (priority, self._counter, name))
+        self._counter += 1
+        label = self.PRIORITY_LABELS.get(priority, '?')
+        print(f"  Admitted: {name:20s} [{label}]")
+
+    def treat_next(self):
+        if not self._heap:
+            print("  No patients waiting.")
+            return
+        priority, _, name = heapq.heappop(self._heap)
+        label = self.PRIORITY_LABELS.get(priority, '?')
+        print(f"  TREATING : {name:20s} [{label}]")
+
+    def show_queue(self):
+        print(f"\n  Waiting ({len(self._heap)} patients):")
+        for pri, _, name in sorted(self._heap):
+            print(f'    Priority {pri} | {self.PRIORITY_LABELS[pri]:12s} | {name}')
+
+
+# Simulation
+eq = EmergencyQueue()
+print('--- ADMISSIONS ---')
+eq.admit('John Doe',       3)   # semi-urgent
+eq.admit('Jane Smith',     1)   # critical
+eq.admit('Peter Mukiza',   2)   # urgent
+eq.admit('Mary Uwera',     4)   # non-urgent
+eq.admit('David Habimana', 1)   # critical
+eq.show_queue()
+
+print('\n--- TREATMENT ORDER ---')
+for _ in range(5):
+    eq.treat_next()
 ```
-
-> **🔧 Fix applied:** added the standard `if current_distance > distances[current_node]: continue` stale-entry guard. Without it the algorithm still produces correct results (because distances are only ever improved, never worsened), but it does redundant work re-processing outdated heap entries — this is the textbook-correct, efficient version.
-
-**Verified:** shortest distances from Kigali — `Kigali: 0, Musanze: 60, Rubavu: 95 (via Musanze), Huye: 135` — manually checked against the graph and confirmed by assertion.
-
-**Complexity: O((V + E) log V)** with a binary heap.
-
-## (c) Graph Using Adjacency Lists
-
-```python
-graph = {
-    "Kigali": [("Musanze", 60), ("Huye", 135)],
-    "Musanze": [("Kigali", 60), ("Rubavu", 35)],
-    "Huye": [("Kigali", 135)],
-    "Rubavu": [("Musanze", 35)],
-}
-```
-
-## (d) Minimum Spanning Tree (Kruskal's Algorithm)
-
-> **🔧 Major fix applied:** the original draft only **sorted** the edges and printed them — this is necessary but not sufficient for Kruskal's algorithm. Without cycle detection, simply taking the first n−1 sorted edges can produce an invalid result (a structure with a cycle, or a disconnected graph) on more complex networks. A proper **Disjoint Set (Union-Find)** structure is required to detect and skip edges that would form a cycle.
-
-```python
-class DisjointSet:
-    def __init__(self, vertices):
-        self.parent = {v: v for v in vertices}
-    def find(self, item):
-        if self.parent[item] != item:
-            self.parent[item] = self.find(self.parent[item])
-        return self.parent[item]
-    def union(self, x, y):
-        root_x, root_y = self.find(x), self.find(y)
-        if root_x != root_y:
-            self.parent[root_y] = root_x
-
-def kruskal(vertices, edges):
-    mst = []
-    ds = DisjointSet(vertices)
-    for weight, u, v in sorted(edges):
-        if ds.find(u) != ds.find(v):
-            mst.append((u, v, weight))
-            ds.union(u, v)
-    return mst
-
-vertices = ["Kigali", "Musanze", "Rubavu", "Huye"]
-edges = [
-    (35, "Musanze", "Rubavu"),
-    (60, "Kigali", "Musanze"),
-    (135, "Kigali", "Huye"),
-]
-print(kruskal(vertices, edges))
-```
-
-**Verified:** the resulting MST has exactly `n − 1 = 3` edges with total cost `35 + 60 + 135 = 230` km — structurally valid (spanning, acyclic).
-
-**Complexity: O(E log E)** (dominated by the edge sort; Union-Find operations are near O(1) amortized with path compression).
 
 ---
 
-# QUESTION 9: String Matching in Search Engines
+## (d) Efficiency Analysis of Queue Operations
 
-## Introduction
+| Operation | Standard Queue (deque) | Priority Queue (heapq) | Notes |
+|---|---|---|---|
+| Enqueue / Admit | O(1) | O(log n) | Heap maintains order on insert |
+| Dequeue / Treat | O(1) | O(log n) | Heap rebalances on pop |
+| Peek (next patient) | O(1) | O(1) | heapq[0] is always minimum |
+| Search by name | O(n) | O(n) | Linear scan required |
+| Space Complexity | O(n) | O(n) | Stores all waiting patients |
 
-String matching algorithms locate specific patterns within large text collections. Search engines rely on these algorithms for efficient document retrieval.
+> For emergency departments, the O(log n) overhead of the priority queue is negligible — even with 1,000 waiting patients, only ~10 comparisons are needed per operation. This is a worthwhile trade-off for ensuring critical patients are always treated first.
 
-## (a) Naive String Matching
+---
+
+# Question 9: Student Records Hash Table — Online Learning Platform
+
+This question explores hashing as an efficient data storage and retrieval mechanism for a platform managing thousands of student enrolment records.
+
+---
+
+## (a) Hashing and Hash Tables Explained
+
+**Hashing** is the process of converting a key (such as a student ID) into a fixed-size integer — the *hash* — which acts as an array index for direct storage and retrieval. A **hash table** (also called a hash map or dictionary) is the data structure that uses this mechanism.
+
+The core advantage is speed: instead of scanning all records to find one student, the system computes a hash and jumps directly to the correct location — an average **O(1) lookup** regardless of how many records exist.
+
+A hash function must be deterministic (same input always produces same output), fast to compute, and distribute keys uniformly to avoid clustering. Python dictionaries are implemented internally as highly optimised hash tables.
+
+---
+
+## (b) Hash Table Implementation
 
 ```python
-def naive_search(text, pattern):
-    n, m = len(text), len(pattern)
-    for i in range(n - m + 1):
-        j = 0
-        while j < m and text[i + j] == pattern[j]:
-            j += 1
-        if j == m:
-            return i
-    return -1
-```
-**Complexity: O(n·m)**
+# Student Records Hash Table using Python Dictionary
 
-## (b) Knuth-Morris-Pratt (KMP) Algorithm
+class StudentHashTable:
+    """Hash table for managing student records on the learning platform."""
 
-```python
-def compute_lps(pattern):
-    lps = [0] * len(pattern)
-    length, i = 0, 1
-    while i < len(pattern):
-        if pattern[i] == pattern[length]:
-            length += 1
-            lps[i] = length
-            i += 1
+    def __init__(self):
+        self._table = {}
+
+    # O(1) average — INSERT
+    def insert(self, student_id, name, course, gpa):
+        if student_id in self._table:
+            print(f"  Warning: {student_id} already exists. Use update().")
+            return
+        self._table[student_id] = {'name': name, 'course': course, 'gpa': gpa}
+        print(f"  Inserted: [{student_id}] {name}")
+
+    # O(1) average — SEARCH
+    def search(self, student_id):
+        record = self._table.get(student_id)
+        if record:
+            print(f"  Found   : [{student_id}] {record}")
         else:
-            if length != 0:
-                length = lps[length - 1]
-            else:
-                lps[i] = 0
-                i += 1
-    return lps
+            print(f"  Not Found: {student_id}")
+        return record
 
-def kmp_search(text, pattern):
-    if pattern == "":
+    # O(1) average — UPDATE
+    def update(self, student_id, **kwargs):
+        if student_id not in self._table:
+            print(f"  Error: {student_id} not found.")
+            return
+        self._table[student_id].update(kwargs)
+        print(f"  Updated : [{student_id}] -> {kwargs}")
+
+    # O(1) average — DELETE
+    def delete(self, student_id):
+        if student_id in self._table:
+            removed = self._table.pop(student_id)
+            print(f"  Deleted : [{student_id}] {removed['name']}")
+        else:
+            print(f"  Delete failed: {student_id} not found.")
+
+    def display_all(self):
+        print(f"\n  All Records ({len(self._table)} students):")
+        for sid, data in self._table.items():
+            print(f"    {sid}: {data}")
+```
+
+---
+
+## (c) CRUD Demonstration
+
+```python
+db = StudentHashTable()
+
+print('=== INSERT ===')
+db.insert('STU001', 'Alice Uwimana', 'Computer Science', 3.8)
+db.insert('STU002', 'Bob Kagabo',    'Data Science',     3.5)
+db.insert('STU003', 'Carol Mutoni',  'Software Eng.',    3.9)
+
+print('\n=== SEARCH ===')
+db.search('STU002')
+db.search('STU999')   # not found
+
+print('\n=== UPDATE ===')
+db.update('STU001', gpa=3.95, course='AI & Machine Learning')
+db.search('STU001')
+
+print('\n=== DELETE ===')
+db.delete('STU003')
+db.delete('STU003')   # already deleted
+
+db.display_all()
+```
+
+---
+
+## (d) Collision Resolution Techniques
+
+A collision occurs when two different keys produce the same hash index. Handling collisions correctly is essential for correctness and performance:
+
+- **Chaining (Separate Chaining):** Each hash bucket holds a linked list of all entries that map to it. Insertion is always O(1); lookup scans the chain, averaging O(1) with a good hash function. Python's `dict` uses an open-addressing variant.
+- **Open Addressing — Linear Probing:** When a slot is occupied, the algorithm checks the next slot (index+1, index+2, ...) until an empty one is found. Simple to implement but can cause *primary clustering* where occupied slots form long runs.
+- **Open Addressing — Quadratic Probing:** Uses a quadratic sequence (index+1², index+2²) to probe, spreading collisions more evenly than linear probing and reducing clustering.
+- **Double Hashing:** Applies a second hash function to determine the probe step size, giving the most uniform distribution and the fewest collisions among open-addressing methods.
+
+In database systems, a well-tuned hash table with load factor below 0.75 maintains near-constant lookup times even with millions of student records, making it far superior to sorted arrays for random-access workloads.
+
+---
+
+# Question 10: Product Recommendation Engine — Recursion and Divide-and-Conquer
+
+This question applies recursion and divide-and-conquer to calculate recommendation scores and loyalty points, and discusses how recursive algorithms underpin modern AI and recommendation systems.
+
+---
+
+## (a) Recursion and Divide-and-Conquer Explained
+
+**Recursion** is a programming technique where a function calls itself with a simpler version of the original problem until it reaches a base case that can be solved directly. Every recursive solution has two components: (1) a *base case* that terminates the recursion, and (2) a *recursive case* that reduces the problem size.
+
+**Divide-and-Conquer** is an algorithmic strategy that breaks a problem into smaller, independent sub-problems, solves each sub-problem recursively, and combines the results. Classic examples include Merge Sort, Binary Search, and the Fast Fourier Transform. The key insight is that sub-problems are solved independently, enabling parallel processing and optimal sub-structure.
+
+In recommendation engines, recursive algorithms traverse tree structures of customer preferences, explore graph paths of product relationships, and compute similarity scores over hierarchical category trees.
+
+---
+
+## (b) Recursive Python Program — Loyalty Points
+
+```python
+# Recursive Loyalty Points Calculator
+# Points formula: points(n) = points(n-1) + bonus(n)
+# Bonus tier doubles every 5 purchases
+
+def loyalty_points(purchases, base_points=10):
+    """
+    Recursively calculate total loyalty points for n purchases.
+    Base case : 0 purchases = 0 points
+    Recursive : points(n) = points(n-1) + base_points * tier_multiplier
+    """
+    if purchases <= 0:
         return 0
-    lps = compute_lps(pattern)
-    i = j = 0
-    while i < len(text):
-        if text[i] == pattern[j]:
-            i += 1; j += 1
-            if j == len(pattern):
-                return i - j
-        else:
-            if j != 0:
-                j = lps[j - 1]
-            else:
-                i += 1
-    return -1
+    tier_multiplier = 2 ** ((purchases - 1) // 5)   # doubles every 5
+    return loyalty_points(purchases - 1, base_points) + base_points * tier_multiplier
+
+
+# Recommendation score using weighted recursive product rating
+def recommendation_score(ratings, weights, index=0):
+    """
+    Recursively compute weighted recommendation score.
+    Base case : no more ratings
+    Recursive : score = (rating * weight) + score(remaining)
+    """
+    if index >= len(ratings):
+        return 0
+    return (ratings[index] * weights[index] +
+            recommendation_score(ratings, weights, index + 1))
+
+
+# --- Test Cases ---
+for n in [0, 5, 10, 15, 20]:
+    pts = loyalty_points(n)
+    print(f"  {n:3d} purchases -> {pts:6d} loyalty points")
+
+print()
+# Product rating: [purchase_freq, review_score, category_match]
+ratings = [0.8, 0.9, 0.7]
+weights = [0.5, 0.3, 0.2]
+score   = recommendation_score(ratings, weights)
+print(f'  Recommendation Score: {score:.3f} / 1.000')
 ```
-**Complexity: O(n + m)**
-
-**Stress-tested:** both algorithms were cross-validated against Python's built-in `str.find()` across 500 randomized cases on a small (2-character) alphabet — the hardest case for string matching, since it maximizes spurious partial matches — plus four hand-picked "tricky" repeating-pattern cases (`"AAAAAAAAAB"` / `"AAAAB"`, etc.) known to expose subtly incorrect KMP implementations. All passed.
-
-## (c) Comparison of Algorithms
-
-| Algorithm | Time Complexity |
-|---|---|
-| Naive Search | O(n·m) |
-| KMP | O(n + m) |
-
-## (d) Performance Analysis
-
-> **🔧 Methodology fix applied:** an early benchmarking attempt implemented naive search using Python's built-in slice comparison (`text[i:i+m] == pattern`), which silently delegates the character comparison to an optimized C routine — making naive search appear *faster* than KMP in wall-clock time despite its worse asymptotic complexity. This was a measurement artifact, not a real result. The corrected benchmark compares both algorithms character-by-character in pure Python (a fair, apples-to-apples comparison), which correctly shows KMP winning by roughly two orders of magnitude on an adversarial, highly-repetitive 20,000-character input (`"AAAA...A"` against a never-matching pattern) — exactly the case theory predicts.
-
-The Naive algorithm repeatedly re-examines characters after a mismatch, which is especially costly on repetitive text. KMP's LPS table lets it skip redundant comparisons, giving it a true linear-time worst case. For a search engine indexing large, naturally repetitive text, KMP is the safer production choice.
 
 ---
 
-# QUESTION 10: Emerging Algorithms and Complexity Problems
+## (c) Time and Space Complexity Analysis
 
-## Introduction
+| Function | Time Complexity | Space Complexity | Notes |
+|---|---|---|---|
+| `loyalty_points(n)` | O(n) | O(n) — call stack depth n | One call per purchase |
+| `recommendation_score(n)` | O(n) | O(n) — call stack depth n | One call per rating |
+| Iterative equivalent | O(n) | O(1) | No stack overhead |
+| Memoized recursive (cache) | O(n) | O(n) — cache dict | Avoids redundant calls |
 
-Optimization problems are common in cybersecurity, logistics, AI, and network design. Efficient algorithms are required to obtain high-quality solutions within reasonable computation time.
-
-## (a) Knapsack Problem (0/1, Dynamic Programming)
-
-```python
-def knapsack(W, weights, values, n):
-    dp = [[0] * (W + 1) for _ in range(n + 1)]
-    for i in range(n + 1):
-        for w in range(W + 1):
-            if i == 0 or w == 0:
-                dp[i][w] = 0
-            elif weights[i - 1] <= w:
-                dp[i][w] = max(values[i - 1] + dp[i - 1][w - weights[i - 1]], dp[i - 1][w])
-            else:
-                dp[i][w] = dp[i - 1][w]
-    return dp[n][W]
-```
-**Complexity: O(n·W)** — pseudo-polynomial (polynomial in the *value* of W, exponential in the number of bits needed to represent W).
-
-**Verified:** cross-checked against an exhaustive brute-force search over all 2ⁿ subsets across 100 randomized trials — all matched exactly.
-
-## (b) Traveling Salesman Problem (TSP) — Brute-Force Simulation
-
-```python
-from itertools import permutations
-
-distance_matrix = [
-    [0, 60, 135, 95],
-    [60, 0, 190, 35],
-    [135, 190, 0, 220],
-    [95, 35, 220, 0],
-]
-cities = [0, 1, 2, 3]
-best_cost = float('inf')
-for path in permutations(cities):
-    cost = sum(distance_matrix[path[i]][path[i + 1]] for i in range(len(path) - 1))
-    best_cost = min(best_cost, cost)
-print(best_cost)
-```
-
-> **Cross-validation finding:** this is the same Rwanda city/distance network used in Question 5's logistics problem. The TSP brute-force result (450 km round-trip) **exactly matches** Question 5's independently-coded Dynamic Programming solution — two different algorithms, implemented separately, agreeing on the optimum. This is strong evidence both are correct.
-
-## (c) Exact vs Approximation Methods
-
-| Method | Accuracy | Speed |
-|---|---|---|
-| Exact Algorithms (DP, Brute Force, Branch & Bound) | Optimal solution | Slower |
-| Approximation Algorithms (Greedy, Heuristics) | Near-optimal | Faster |
-
-**Examples:**
-- Knapsack via Dynamic Programming → Exact method
-- Greedy nearest-neighbour route selection (Question 5) → Approximation method
-
-## (d) Computational Complexity Analysis
-
-| Problem | Algorithm | Complexity |
-|---|---|---|
-| Knapsack (0/1) | Dynamic Programming | O(n·W) |
-| Traveling Salesman | Brute Force | O(n!) |
-| Traveling Salesman | Held-Karp DP (Question 5) | O(n² · 2ⁿ) |
-
-### Discussion
-
-The Knapsack problem is solvable efficiently with dynamic programming because it has overlapping subproblems and optimal substructure — the DP table reuses solutions instead of recomputing them. The Traveling Salesman Problem has no known polynomial-time exact algorithm (it is NP-hard); brute force is O(n!), and the smarter Held-Karp DP approach used in Question 5 improves this to O(n² · 2ⁿ) — still exponential, but tractable to roughly 20 cities, where brute force is not (20! ≈ 2.4 × 10¹⁸). Beyond that scale, approximation algorithms (nearest-neighbour, genetic algorithms, simulated annealing) become the only practical option, trading a small amount of accuracy for tractable runtime.
+The recursive implementations have O(n) time complexity because each call processes exactly one element. The O(n) space from the call stack is the main disadvantage — for 10,000 purchases Python would exceed its default recursion limit. A production implementation would either use iteration or apply Python's `functools.lru_cache` memoisation decorator.
 
 ---
 
-# Conclusion
+## (d) Recursive Algorithms in AI, Search, and Recommendation Systems
 
-This assignment applied advanced algorithm design techniques across nine real-world system types: university registration, academic information systems, social networks, e-commerce, logistics, banking, transport networks, search engines, and cybersecurity optimization.
+- **Decision Trees and Random Forests:** Decision tree construction is inherently recursive. The algorithm selects the best feature to split on, then recursively builds sub-trees for each branch until a leaf condition (pure class or max depth) is reached. Random Forests aggregate hundreds of such recursive trees.
 
-Every algorithm presented was not just written but **independently verified**:
-- 200–500 randomized cross-validation trials per applicable question against trusted ground truth (Python's built-ins or brute-force search)
-- Boundary and edge-case testing (empty inputs, disconnected graphs, duplicate keys, invalid marks)
-- Two genuine bugs were found and fixed (Q1's missing student/duplicate-enrollment checks, Q7's hash table silently duplicating re-inserted keys)
-- One incomplete answer was completed (Q8's Kruskal MST, upgraded from "sort edges" to a full Union-Find cycle-safe implementation)
-- One claim was upgraded from assertion to proof (Q7's BST-vs-AVL comparison, backed by an actual AVL implementation and measured tree heights)
-- One benchmarking methodology flaw was caught and corrected (Q9's naive-vs-KMP timing, which was initially distorted by Python's C-optimized string slicing)
-- One independent cross-check across questions (Q5 and Q10 agree exactly on the optimal Rwanda logistics route)
+- **Search Engines — Crawling and Indexing:** Web crawlers use recursive DFS to follow hyperlinks from page to page, building an inverted index. PageRank, which determines search result ordering, is computed through repeated recursive matrix multiplication until convergence.
 
-The companion Jupyter notebooks (`Q1` – `Q10`) contain this same code **actually executed**, with real, reproducible output — not transcribed or assumed results.
+- **Recommendation Systems — Collaborative Filtering:** Matrix factorisation algorithms (SVD, ALS) decompose the user-item rating matrix recursively, finding latent features that explain purchasing patterns. Graph-based recommenders traverse friend-of-friend relationships recursively to surface relevant products.
+
+- **Natural Language Processing:** Syntactic parsers use recursive descent to build parse trees from sentences. Transformer attention mechanisms compute contextual embeddings through repeated recursive self-attention layers, enabling models like GPT to understand product descriptions.
+
+- **Dynamic Programming in Pricing:** E-commerce platforms use recursive DP with memoisation to compute optimal bundle prices, discount strategies, and inventory allocation — problems where the optimal solution depends on optimal solutions to overlapping sub-problems.
+
+In summary, recursion is not merely an academic exercise — it is the structural backbone of the most impactful algorithms in modern computing, from the search results you see to the products recommended to you and the prices you are charged.
+
+---
+
+*Frederick Oba (2501200) & Isingizwe Munezero Victor (26015486) — University of Kigali*
