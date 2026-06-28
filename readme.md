@@ -1323,4 +1323,3 @@ In summary, recursion is not merely an academic exercise — it is the structura
 
 ---
 
-*Frederick Oba (2501200) & Isingizwe Munezero Victor (26015486) — University of Kigali*
